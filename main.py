@@ -51,41 +51,51 @@ def main():
             try:
                 data = response.json()
                 
-                # Buscar solo los stats de V26: ACT III Competitive
+                # Buscar el ACT actual competitivo
                 if 'data' in data and 'segments' in data['data']:
+                    acto_actual = None
+                    stats_v26 = None
+                    
+                    # Buscar el segment de tipo "season" y competitivo más reciente
                     for segment in data['data']['segments']:
-                        if segment['metadata']['name'] == 'V26: ACT III Competitive':
+                        if (segment.get('type') == 'season' and 
+                            segment.get('metadata', {}).get('playlist') == 'competitive'):
+                            acto_actual = segment['metadata']['name']
                             stats_v26 = segment['stats']
-                            
-                            # Extraer solo los datos principales
-                            datos_principales = {
-                                'Jugador': nombre,
-                                'Damage/Round': stats_v26.get('damagePerRound', {}).get('displayValue'),
-                                'K/D Ratio': stats_v26.get('kDRatio', {}).get('displayValue'),
-                                'Headshot %': stats_v26.get('headshotsPercentage', {}).get('displayValue'),
-                                'Win %': stats_v26.get('matchesWinPct', {}).get('displayValue'),
-                                'Wins': stats_v26.get('matchesWon', {}).get('displayValue'),
-                                'KAST': stats_v26.get('kAST', {}).get('displayValue'),
-                                'DDA/Round': stats_v26.get('damageDeltaPerRound', {}).get('displayValue'),
-                                'Kills': stats_v26.get('kills', {}).get('displayValue'),
-                                'Deaths': stats_v26.get('deaths', {}).get('displayValue'),
-                                'Assists': stats_v26.get('assists', {}).get('displayValue'),
-                                'ACS': stats_v26.get('score', {}).get('displayValue'),
-                                'KAD Ratio': stats_v26.get('kADRatio', {}).get('displayValue'),
-                                'Kills/Round': stats_v26.get('killsPerRound', {}).get('displayValue'),
-                                'First Bloods': stats_v26.get('firstBloods', {}).get('displayValue'),
-                                'Flawless Rounds': stats_v26.get('flawless', {}).get('displayValue'),
-                                'Aces': stats_v26.get('aces', {}).get('displayValue')
-                            }
-                            
-                            # Guardar en un archivo con el nombre de la persona dentro de la carpeta
-                            archivo_nombre = os.path.join(carpeta, f"{nombre}.json")
-                            with open(archivo_nombre, 'w') as f:
-                                json.dump(datos_principales, f, indent=4)
-                                print(f"Stats guardados en {archivo_nombre}")
                             break
+                    
+                    if acto_actual and stats_v26:
+                        # Extraer solo los datos principales
+                        datos_principales = {
+                            'Jugador': nombre,
+                            'Acto': acto_actual,
+                            'Damage/Round': stats_v26.get('damagePerRound', {}).get('displayValue'),
+                            'K/D Ratio': stats_v26.get('kDRatio', {}).get('displayValue'),
+                            'Headshot %': stats_v26.get('headshotsPercentage', {}).get('displayValue'),
+                            'Win %': stats_v26.get('matchesWinPct', {}).get('displayValue'),
+                            'Wins': stats_v26.get('matchesWon', {}).get('displayValue'),
+                            'KAST': stats_v26.get('kAST', {}).get('displayValue'),
+                            'DDA/Round': stats_v26.get('damageDeltaPerRound', {}).get('displayValue'),
+                            'Kills': stats_v26.get('kills', {}).get('displayValue'),
+                            'Deaths': stats_v26.get('deaths', {}).get('displayValue'),
+                            'Assists': stats_v26.get('assists', {}).get('displayValue'),
+                            'ACS': stats_v26.get('score', {}).get('displayValue'),
+                            'KAD Ratio': stats_v26.get('kADRatio', {}).get('displayValue'),
+                            'Kills/Round': stats_v26.get('killsPerRound', {}).get('displayValue'),
+                            'First Bloods': stats_v26.get('firstBloods', {}).get('displayValue'),
+                            'Flawless Rounds': stats_v26.get('flawless', {}).get('displayValue'),
+                            'Aces': stats_v26.get('aces', {}).get('displayValue')
+                        }
+                        
+                        # Guardar en un archivo con el nombre de la persona dentro de la carpeta
+                        archivo_nombre = os.path.join(carpeta, f"{nombre}.json")
+                        with open(archivo_nombre, 'w') as f:
+                            json.dump(datos_principales, f, indent=4)
+                            print(f"Stats guardados en {archivo_nombre}")
+                    else:
+                        print(f"No se encontró acto competitivo actual para {nombre}")
                 else:
-                    print(f"No se encontró V26: ACT III Competitive para {nombre}")
+                    print(f"No se encontró la estructura esperada para {nombre}")
 
             except ValueError:
                 print(f"Error al procesar JSON para {nombre}")
