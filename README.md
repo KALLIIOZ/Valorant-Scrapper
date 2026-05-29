@@ -130,8 +130,8 @@ Cada archivo JSON en la carpeta `stats/` contiene las siguientes estadísticas d
 
 | Jugador | Fecha | Damage/Round | K/D Ratio | ... | Damage/Round_Cambio | K/D Ratio_Cambio | ... |
 |---------|-------|--------------|-----------|-----|---------------------|------------------|-----|
-| Quesitoo | 2026-05-28 10:30:00 | 145.6 | 1.09 | ... | | | |
-| Nabi | 2026-05-28 10:30:00 | 142.3 | 1.15 | ... | | | |
+| Lord Bane | 2026-05-28 10:30:00 | 145.6 | 1.09 | ... | | | |
+| Jokker898 | 2026-05-28 10:30:00 | 142.3 | 1.15 | ... | | | |
 
 ## 🔄 Ejecución periódica
 
