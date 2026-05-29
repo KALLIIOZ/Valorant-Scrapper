@@ -14,14 +14,12 @@ def main():
     'Accept': 'application/json, text/plain, */*',
     'sec-ch-ua': '"Chromium";v="148", "Brave";v="148", "Not/A)Brand";v="99"',
     'sec-ch-ua-mobile': '?0',
-    }
-    
-    # Crear carpeta para los stats si no existe
+    }  
+
     carpeta = 'stats'
     if not os.path.exists(carpeta):
         os.makedirs(carpeta)
     
-    # Leer los nombres del archivo
     try:
         with open('nombres.txt', 'r') as f:
             nombres = f.read().strip().split('\n')
@@ -29,18 +27,15 @@ def main():
         print("Error: No se encontró el archivo nombres.txt")
         return
     
-    # Iterar sobre cada nombre
     print("Obteniendo estadísticas...\n")
     for nombre_completo in nombres:
         nombre_completo = nombre_completo.strip()
         if not nombre_completo:
             continue
         
-        # Extraer nombre e id
         partes = nombre_completo.split('#')
         nombre = partes[0].strip()
         
-        # Construir la URL con encoding
         nombre_encoded = quote(nombre_completo)
         url = f'https://api.tracker.gg/api/v2/valorant/standard/profile/riot/{nombre_encoded}'
         
@@ -52,14 +47,12 @@ def main():
             try:
                 data = response.json()
                 
-                # Buscar el ACT actual competitivo
                 if 'data' in data and 'segments' in data['data']:
                     segments = data['data']['segments']
                     
                     acto_actual = None
                     stats_v26 = None
                     
-                    # Buscar el segment de tipo "season" más reciente (el primero que encuentre)
                     for segment in data['data']['segments']:
                         if segment.get('type') == 'season':
                             acto_actual = segment['metadata']['name']
@@ -67,7 +60,6 @@ def main():
                             break
                     
                     if acto_actual and stats_v26:
-                        # Extraer solo los datos principales
                         datos_principales = {
                             'Jugador': nombre,
                             'Acto': acto_actual,
@@ -89,7 +81,6 @@ def main():
                             'Aces': stats_v26.get('aces', {}).get('displayValue')
                         }
                         
-                        # Guardar en un archivo con el nombre de la persona dentro de la carpeta
                         archivo_nombre = os.path.join(carpeta, f"{nombre}.json")
                         with open(archivo_nombre, 'w') as f:
                             json.dump(datos_principales, f, indent=4)
@@ -106,7 +97,6 @@ def main():
         else:
             print(f"  ✗ {nombre} - Error {response.status_code}")
     
-    # Exportar todos los stats a XLSX
     print("\n" + "="*50)
     exportar_stats_a_xlsx()
 

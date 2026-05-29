@@ -17,12 +17,10 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx'):
         archivo_salida (str): Nombre del archivo XLSX de salida
     """
     
-    # Verificar si la carpeta existe
     if not os.path.exists(carpeta):
         print(f"Error: La carpeta {carpeta} no existe")
         return False
     
-    # Leer todos los JSON
     datos = []
     fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
@@ -41,19 +39,14 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx'):
         print("No se encontraron archivos JSON en la carpeta")
         return False
     
-    # Convertir a DataFrame
     df_nuevo = pd.DataFrame(datos)
     
-    # Columnas numéricas para comparar (excluyendo Jugador y Fecha)
     columnas_numericas = [col for col in df_nuevo.columns 
                          if col not in ['Jugador', 'Fecha'] and col != 'Comparación']
     
-    # Si el archivo ya existe, leer los datos anteriores y hacer comparación
     if os.path.exists(archivo_salida):
         try:
             df_existente = pd.read_excel(archivo_salida, sheet_name='Stats')
-            
-            # Crear columnas de comparación para datos nuevos
             for col in columnas_numericas:
                 df_nuevo[f'{col}_Cambio'] = ''
                 
@@ -61,21 +54,17 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx'):
                     jugador = row['Jugador']
                     valor_nuevo = row[col]
                     
-                    # Buscar el registro anterior más reciente de este jugador
                     registros_anteriores = df_existente[df_existente['Jugador'] == jugador]
                     
                     if not registros_anteriores.empty:
-                        # Tomar el último registro (más reciente)
                         valor_anterior = registros_anteriores.iloc[-1][col]
                         
-                        # Convertir a float para comparación
                         try:
                             valor_nuevo_float = float(str(valor_nuevo).replace('%', ''))
                             valor_anterior_float = float(str(valor_anterior).replace('%', ''))
                             
                             diferencia = valor_nuevo_float - valor_anterior_float
                             
-                            # Determinar si es mejora o bajón (considerar que % mayor es mejor, números como K/D también)
                             if diferencia > 0:
                                 df_nuevo.at[idx, f'{col}_Cambio'] = f'+{diferencia:.2f}'
                             elif diferencia < 0:
@@ -84,23 +73,18 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx'):
                                 df_nuevo.at[idx, f'{col}_Cambio'] = '0'
                         except:
                             df_nuevo.at[idx, f'{col}_Cambio'] = 'N/A'
-                    # Si no hay registro anterior, dejar vacío
             
-            # Concatenar datos nuevos con los existentes
             df = pd.concat([df_existente, df_nuevo], ignore_index=True)
             print(f"Datos agregados al archivo existente {archivo_salida}")
         except Exception as e:
             print(f"Error al leer archivo existente: {e}. Creando nuevo archivo...")
             df = df_nuevo
     else:
-        # Si es el primer archivo, no hay comparación
         df = df_nuevo
     
-    # Exportar a XLSX
     try:
         df.to_excel(archivo_salida, index=False, sheet_name='Stats')
         
-        # Aplicar formato condicional
         aplicar_formato_condicional(archivo_salida, df, columnas_numericas)
         
         print(f"Estadísticas exportadas a {archivo_salida}")
