@@ -18,12 +18,9 @@ pip install requests beautifulsoup4 pandas openpyxl
 
 **Ejemplo de `nombres.txt`:**
 ```
-Quesitoo#Cofy
-Nabi#Dprss
-Arrocito salado#Angel
-Daiisy#0215
-Kyree#ery
-Vanilla#Girly
+Lord Bane#Sith
+Jokker898#LAN
+Lord Bane#P4DME
 ```
 
 ## 🚀 Cómo usar
