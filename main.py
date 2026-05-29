@@ -30,6 +30,7 @@ def main():
         return
     
     # Iterar sobre cada nombre
+    print("Obteniendo estadísticas...\n")
     for nombre_completo in nombres:
         nombre_completo = nombre_completo.strip()
         if not nombre_completo:
@@ -53,13 +54,14 @@ def main():
                 
                 # Buscar el ACT actual competitivo
                 if 'data' in data and 'segments' in data['data']:
+                    segments = data['data']['segments']
+                    
                     acto_actual = None
                     stats_v26 = None
                     
-                    # Buscar el segment de tipo "season" y competitivo más reciente
+                    # Buscar el segment de tipo "season" más reciente (el primero que encuentre)
                     for segment in data['data']['segments']:
-                        if (segment.get('type') == 'season' and 
-                            segment.get('metadata', {}).get('playlist') == 'competitive'):
+                        if segment.get('type') == 'season':
                             acto_actual = segment['metadata']['name']
                             stats_v26 = segment['stats']
                             break
@@ -91,16 +93,18 @@ def main():
                         archivo_nombre = os.path.join(carpeta, f"{nombre}.json")
                         with open(archivo_nombre, 'w') as f:
                             json.dump(datos_principales, f, indent=4)
-                            print(f"Stats guardados en {archivo_nombre}")
+                            print(f"  ✓ {nombre}")
                     else:
-                        print(f"No se encontró acto competitivo actual para {nombre}")
+                        print(f"  ⚠ {nombre} - No se encontró el ACT actual")
                 else:
-                    print(f"No se encontró la estructura esperada para {nombre}")
+                    print(f"  ⚠ {nombre} - Estructura de datos no válida")
 
             except ValueError:
-                print(f"Error al procesar JSON para {nombre}")
+                print(f"  ✗ {nombre} - Error al procesar JSON")
+            except Exception as e:
+                print(f"  ✗ {nombre} - {type(e).__name__}")
         else:
-            print(f"Error en la petición para {nombre}. Código de estado: {response.status_code}")
+            print(f"  ✗ {nombre} - Error {response.status_code}")
     
     # Exportar todos los stats a XLSX
     print("\n" + "="*50)
