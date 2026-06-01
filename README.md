@@ -65,19 +65,9 @@ Cada archivo JSON en la carpeta `stats/` contiene las siguientes estadísticas d
   "Damage/Round": "145.6",
   "K/D Ratio": "1.09",
   "Headshot %": "35.1%",
-  "Win %": "52.8%",
-  "Wins": "19",
   "KAST": "73.0%",
-  "DDA/Round": "14",
-  "Kills": "562",
-  "Deaths": "514",
-  "Assists": "202",
   "ACS": "214.7",
   "KAD Ratio": "1.49",
-  "Kills/Round": "0.8",
-  "First Bloods": "37",
-  "Flawless Rounds": "31",
-  "Aces": "1"
 }
 ```
 
@@ -85,19 +75,9 @@ Cada archivo JSON en la carpeta `stats/` contiene las siguientes estadísticas d
 - **Damage/Round**: Daño promedio por ronda
 - **K/D Ratio**: Proporción de asesinatos / muertes
 - **Headshot %**: Porcentaje de asesinatos con headshot
-- **Win %**: Porcentaje de victorias
-- **Wins**: Total de partidas ganadas
 - **KAST**: Porcentaje de rondas con Kill, Assist, Survival o Trade
-- **DDA/Round**: Diferencia de daño por ronda
-- **Kills**: Total de asesinatos
-- **Deaths**: Total de muertes
-- **Assists**: Total de asistencias
 - **ACS**: Average Combat Score (puntuación promedio de combate)
 - **KAD Ratio**: Proporción de (Kills + Assists) / Deaths
-- **Kills/Round**: Asesinatos promedio por ronda
-- **First Bloods**: Primeros asesinatos de la ronda
-- **Flawless Rounds**: Rondas sin morir
-- **Aces**: Rondas donde se consiguieron 5 asesinatos
 
 ## 📊 Contenido del archivo XLSX (`estadisticas.xlsx`)
 
@@ -143,7 +123,7 @@ Para monitorear el progreso de tus compañeros en el tiempo, ejecuta el script r
 ## 📝 Notas
 
 - La API utilizada es `https://api.tracker.gg/` (Tracker.gg)
-- Solo extrae estadísticas de **V26: ACT III Competitive**
+- Extrae estadísticas del acto mas reciente
 - Si un jugador no existe o no tiene datos disponibles, aparecerá un error en la consola
 - Los JSONs se guardan con el nombre del jugador (sin el ID)
 
@@ -162,4 +142,4 @@ Para monitorear el progreso de tus compañeros en el tiempo, ejecuta el script r
 
 ---
 
-**¡Listo!** Tu compañero ya sabe cómo usar la herramienta. 🎮📈
+**¡Listo!** Ya sabes cómo usar la herramienta. 🎮📈
