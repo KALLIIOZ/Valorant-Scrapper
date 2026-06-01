@@ -6,86 +6,85 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font, Alignment
 
 
-def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx'):
+def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx', carpeta_premier='stats_premier'):
     """
-    Lee todos los archivos JSON de la carpeta de stats y los exporta a un archivo XLSX.
+    Lee todos los archivos JSON de las carpetas de stats y los exporta a un archivo XLSX.
     Los datos se organizan por fecha sin sobrescribir información anterior.
     Incluye comparación de rendimiento con respecto a la fecha anterior.
+    Crea dos hojas: una para Competitivo y otra para Premier.
     
     Args:
-        carpeta (str): Ruta de la carpeta donde están los JSON
+        carpeta (str): Ruta de la carpeta donde están los JSON de Competitivo
         archivo_salida (str): Nombre del archivo XLSX de salida
+        carpeta_premier (str): Ruta de la carpeta donde están los JSON de Premier
     """
     
     if not os.path.exists(carpeta):
         print(f"Error: La carpeta {carpeta} no existe")
         return False
     
-    datos = []
-    fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    
-    for archivo in os.listdir(carpeta):
-        if archivo.endswith('.json'):
-            ruta_archivo = os.path.join(carpeta, archivo)
-            try:
-                with open(ruta_archivo, 'r') as f:
-                    contenido = json.load(f)
-                    contenido['Fecha'] = fecha_actual
-                    datos.append(contenido)
-            except Exception as e:
-                print(f"Error al leer {archivo}: {e}")
-    
-    if not datos:
-        print("No se encontraron archivos JSON en la carpeta")
+    # Leer datos de Competitivo
+    datos_competitivo = leer_stats_carpeta(carpeta)
+    if not datos_competitivo:
+        print("No se encontraron archivos JSON en stats")
         return False
     
-    df_nuevo = pd.DataFrame(datos)
+    # Leer datos de Premier
+    datos_premier = leer_stats_carpeta(carpeta_premier) if os.path.exists(carpeta_premier) else None
     
-    columnas_numericas = [col for col in df_nuevo.columns 
-                         if col not in ['Jugador', 'Fecha'] and col != 'Comparación']
+    fecha_actual = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     
+    # Procesar Competitivo
+    df_competitivo_nuevo = pd.DataFrame(datos_competitivo)
+    df_competitivo_nuevo['Fecha'] = fecha_actual
+    
+    columnas_numericas_comp = [col for col in df_competitivo_nuevo.columns 
+                               if col not in ['Jugador', 'Fecha', 'Acto'] and col != 'Comparación']
+    
+    # Procesar Premier
+    if datos_premier:
+        df_premier_nuevo = pd.DataFrame(datos_premier)
+        df_premier_nuevo['Fecha'] = fecha_actual
+        columnas_numericas_prem = [col for col in df_premier_nuevo.columns 
+                                   if col not in ['Jugador', 'Fecha', 'Season', 'SeasonId'] and col != 'Comparación']
+    
+    # Manejo de archivo existente
     if os.path.exists(archivo_salida):
         try:
-            df_existente = pd.read_excel(archivo_salida, sheet_name='Stats')
-            for col in columnas_numericas:
-                df_nuevo[f'{col}_Cambio'] = ''
-                
-                for idx, row in df_nuevo.iterrows():
-                    jugador = row['Jugador']
-                    valor_nuevo = row[col]
-                    
-                    registros_anteriores = df_existente[df_existente['Jugador'] == jugador]
-                    
-                    if not registros_anteriores.empty:
-                        valor_anterior = registros_anteriores.iloc[-1][col]
-                        
-                        try:
-                            valor_nuevo_float = float(str(valor_nuevo).replace('%', ''))
-                            valor_anterior_float = float(str(valor_anterior).replace('%', ''))
-                            
-                            diferencia = valor_nuevo_float - valor_anterior_float
-                            
-                            if diferencia > 0:
-                                df_nuevo.at[idx, f'{col}_Cambio'] = f'+{diferencia:.2f}'
-                            elif diferencia < 0:
-                                df_nuevo.at[idx, f'{col}_Cambio'] = f'{diferencia:.2f}'
-                            else:
-                                df_nuevo.at[idx, f'{col}_Cambio'] = '0'
-                        except:
-                            df_nuevo.at[idx, f'{col}_Cambio'] = 'N/A'
-            
-            df = pd.concat([df_existente, df_nuevo], ignore_index=True)
-            print(f"Datos agregados al archivo existente {archivo_salida}")
+            df_competitivo_existente = pd.read_excel(archivo_salida, sheet_name='Competitivo')
+            df_competitivo = agregar_cambios(df_competitivo_nuevo, df_competitivo_existente, columnas_numericas_comp)
+            df_competitivo = pd.concat([df_competitivo_existente, df_competitivo], ignore_index=True)
         except Exception as e:
-            print(f"Error al leer archivo existente: {e}. Creando nuevo archivo...")
-            df = df_nuevo
-    else:
-        df = df_nuevo
-    
-    try:
-        df.to_excel(archivo_salida, index=False, sheet_name='Stats')
+            print(f"Error al leer Competitivo existente: {e}")
+            df_competitivo = df_competitivo_nuevo
         
-        aplicar_formato_condicional(archivo_salida, df, columnas_numericas)
+        if datos_premier:
+            try:
+                # Verificar si la hoja Premier existe
+                xl_file = pd.ExcelFile(archivo_salida)
+                if 'Premier' in xl_file.sheet_names:
+                    df_premier_existente = pd.read_excel(archivo_salida, sheet_name='Premier')
+                    df_premier = agregar_cambios(df_premier_nuevo, df_premier_existente, columnas_numericas_prem)
+                    df_premier = pd.concat([df_premier_existente, df_premier], ignore_index=True)
+                else:
+                    df_premier = df_premier_nuevo
+            except Exception as e:
+                print(f"Error al leer Premier existente: {e}")
+                df_premier = df_premier_nuevo
+    else:
+        df_competitivo = df_competitivo_nuevo
+        df_premier = df_premier_nuevo if datos_premier else None
+    
+    # Exportar a XLSX
+    try:
+        with pd.ExcelWriter(archivo_salida, engine='openpyxl', mode='w') as writer:
+            df_competitivo.to_excel(writer, index=False, sheet_name='Competitivo')
+            if df_premier is not None:
+                df_premier.to_excel(writer, index=False, sheet_name='Premier')
+        
+        aplicar_formato_condicional(archivo_salida, df_competitivo, columnas_numericas_comp, 'Competitivo')
+        if df_premier is not None:
+            aplicar_formato_condicional(archivo_salida, df_premier, columnas_numericas_prem, 'Premier')
         
         print(f"Estadísticas exportadas a {archivo_salida}")
         return True
@@ -94,7 +93,58 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx'):
         return False
 
 
-def aplicar_formato_condicional(archivo_salida, df, columnas_numericas):
+def leer_stats_carpeta(carpeta):
+    """Lee todos los JSON de una carpeta"""
+    datos = []
+    if not os.path.exists(carpeta):
+        return datos
+    
+    for archivo in os.listdir(carpeta):
+        if archivo.endswith('.json'):
+            ruta_archivo = os.path.join(carpeta, archivo)
+            try:
+                with open(ruta_archivo, 'r') as f:
+                    contenido = json.load(f)
+                    datos.append(contenido)
+            except Exception as e:
+                print(f"Error al leer {archivo}: {e}")
+    
+    return datos
+
+
+def agregar_cambios(df_nuevo, df_existente, columnas_numericas):
+    """Agrega columnas de cambio comparando con el registro anterior"""
+    for col in columnas_numericas:
+        df_nuevo[f'{col}_Cambio'] = ''
+        
+        for idx, row in df_nuevo.iterrows():
+            jugador = row['Jugador']
+            valor_nuevo = row[col]
+            
+            registros_anteriores = df_existente[df_existente['Jugador'] == jugador]
+            
+            if not registros_anteriores.empty:
+                valor_anterior = registros_anteriores.iloc[-1][col]
+                
+                try:
+                    valor_nuevo_float = float(str(valor_nuevo).replace('%', ''))
+                    valor_anterior_float = float(str(valor_anterior).replace('%', ''))
+                    
+                    diferencia = valor_nuevo_float - valor_anterior_float
+                    
+                    if diferencia > 0:
+                        df_nuevo.at[idx, f'{col}_Cambio'] = f'+{diferencia:.2f}'
+                    elif diferencia < 0:
+                        df_nuevo.at[idx, f'{col}_Cambio'] = f'{diferencia:.2f}'
+                    else:
+                        df_nuevo.at[idx, f'{col}_Cambio'] = '0'
+                except:
+                    df_nuevo.at[idx, f'{col}_Cambio'] = 'N/A'
+    
+    return df_nuevo
+
+
+def aplicar_formato_condicional(archivo_salida, df, columnas_numericas, nombre_hoja='Competitivo'):
     """
     Aplica formato condicional de colores a las columnas de cambio.
     Rojo para bajón de rendimiento, verde para mejora.
@@ -102,7 +152,7 @@ def aplicar_formato_condicional(archivo_salida, df, columnas_numericas):
     """
     try:
         wb = load_workbook(archivo_salida)
-        ws = wb.active
+        ws = wb[nombre_hoja]
         
         # Definir colores
         color_header = '4472C4'  # Azul oscuro para encabezados

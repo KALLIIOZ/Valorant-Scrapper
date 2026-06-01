@@ -3,3 +3,4 @@ stats/*
 __pycache__/
 *.pyc
 *.txt
+stats_premier/*

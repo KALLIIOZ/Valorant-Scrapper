@@ -4,6 +4,7 @@ import os
 from bs4 import BeautifulSoup as bs
 from urllib.parse import quote
 from estadisticas import exportar_stats_a_xlsx
+import premier
 
 
 def main():
@@ -52,17 +53,27 @@ def main():
                     
                     acto_actual = None
                     stats_v26 = None
+                    season_id_premier = None
                     
+                    # Buscar Competitivo y Premier en los segments
                     for segment in data['data']['segments']:
-                        if segment.get('type') == 'season':
-                            acto_actual = segment['metadata']['name']
+                        segment_name = segment.get('metadata', {}).get('name', '')
+                        
+                        # Competitivo: primer segment de tipo season
+                        if segment.get('type') == 'season' and acto_actual is None:
+                            acto_actual = segment_name
                             stats_v26 = segment['stats']
+                        
+                        # Premier: segment con nombre defaultSeason
+                        if segment_name == 'defaultSeason':
+                            season_id_premier = segment['metadata'].get('seasonId')
                             break
                     
                     if acto_actual and stats_v26:
                         datos_principales = {
                             'Jugador': nombre,
                             'Acto': acto_actual,
+                            'SeasonIdPremier': season_id_premier,
                             'Damage/Round': stats_v26.get('damagePerRound', {}).get('displayValue'),
                             'K/D Ratio': stats_v26.get('kDRatio', {}).get('displayValue'),
                             'Headshot %': stats_v26.get('headshotsPercentage', {}).get('displayValue'),
@@ -97,6 +108,11 @@ def main():
         else:
             print(f"  ✗ {nombre} - Error {response.status_code}")
     
+    # Procesar Premier
+    print("\n" + "="*50)
+    premier.main()
+    
+    # Exportar estadísticas combinadas
     print("\n" + "="*50)
     exportar_stats_a_xlsx()
 
