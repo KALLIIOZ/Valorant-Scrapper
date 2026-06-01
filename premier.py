@@ -102,19 +102,9 @@ def main():
                         'Damage/Round': stats_premier.get('damagePerRound', {}).get('displayValue'),
                         'K/D Ratio': stats_premier.get('kDRatio', {}).get('displayValue'),
                         'Headshot %': stats_premier.get('headshotsPercentage', {}).get('displayValue'),
-                        'Win %': stats_premier.get('matchesWinPct', {}).get('displayValue'),
-                        'Wins': stats_premier.get('matchesWon', {}).get('displayValue'),
                         'KAST': stats_premier.get('kAST', {}).get('displayValue'),
-                        'DDA/Round': stats_premier.get('damageDeltaPerRound', {}).get('displayValue'),
-                        'Kills': stats_premier.get('kills', {}).get('displayValue'),
-                        'Deaths': stats_premier.get('deaths', {}).get('displayValue'),
-                        'Assists': stats_premier.get('assists', {}).get('displayValue'),
                         'ACS': stats_premier.get('score', {}).get('displayValue'),
                         'KAD Ratio': stats_premier.get('kADRatio', {}).get('displayValue'),
-                        'Kills/Round': stats_premier.get('killsPerRound', {}).get('displayValue'),
-                        'First Bloods': stats_premier.get('firstBloods', {}).get('displayValue'),
-                        'Flawless Rounds': stats_premier.get('flawless', {}).get('displayValue'),
-                        'Aces': stats_premier.get('aces', {}).get('displayValue')
                     }
                     
                     # Guardar JSON

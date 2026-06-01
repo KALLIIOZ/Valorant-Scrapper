@@ -28,7 +28,7 @@ def main():
         print("Error: No se encontró el archivo nombres.txt")
         return
     
-    print("Obteniendo estadísticas...\n")
+    print("\nObteniendo estadísticas...\n")
     for nombre_completo in nombres:
         nombre_completo = nombre_completo.strip()
         if not nombre_completo:
@@ -79,19 +79,9 @@ def main():
                             'Damage/Round': stats_v26.get('damagePerRound', {}).get('displayValue'),
                             'K/D Ratio': stats_v26.get('kDRatio', {}).get('displayValue'),
                             'Headshot %': stats_v26.get('headshotsPercentage', {}).get('displayValue'),
-                            'Win %': stats_v26.get('matchesWinPct', {}).get('displayValue'),
-                            'Wins': stats_v26.get('matchesWon', {}).get('displayValue'),
                             'KAST': stats_v26.get('kAST', {}).get('displayValue'),
-                            'DDA/Round': stats_v26.get('damageDeltaPerRound', {}).get('displayValue'),
-                            'Kills': stats_v26.get('kills', {}).get('displayValue'),
-                            'Deaths': stats_v26.get('deaths', {}).get('displayValue'),
-                            'Assists': stats_v26.get('assists', {}).get('displayValue'),
                             'ACS': stats_v26.get('score', {}).get('displayValue'),
                             'KAD Ratio': stats_v26.get('kADRatio', {}).get('displayValue'),
-                            'Kills/Round': stats_v26.get('killsPerRound', {}).get('displayValue'),
-                            'First Bloods': stats_v26.get('firstBloods', {}).get('displayValue'),
-                            'Flawless Rounds': stats_v26.get('flawless', {}).get('displayValue'),
-                            'Aces': stats_v26.get('aces', {}).get('displayValue')
                         }
                         
                         archivo_nombre = os.path.join(carpeta, f"{nombre}.json")
