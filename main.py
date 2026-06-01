@@ -55,7 +55,13 @@ def main():
                     stats_v26 = None
                     season_id_premier = None
                     
-                    # Buscar Competitivo y Premier en los segments
+                    # Extraer season_id_premier del metadata principal (data['metadata']['seasons'])
+                    if 'metadata' in data['data'] and 'seasons' in data['data']['metadata']:
+                        seasons = data['data']['metadata']['seasons']
+                        if seasons:
+                            season_id_premier = seasons[0].get('id')
+                    
+                    # Buscar Competitivo en los segments
                     for segment in data['data']['segments']:
                         segment_name = segment.get('metadata', {}).get('name', '')
                         
@@ -63,10 +69,6 @@ def main():
                         if segment.get('type') == 'season' and acto_actual is None:
                             acto_actual = segment_name
                             stats_v26 = segment['stats']
-                        
-                        # Premier: segment con nombre defaultSeason
-                        if segment_name == 'defaultSeason':
-                            season_id_premier = segment['metadata'].get('seasonId')
                             break
                     
                     if acto_actual and stats_v26:

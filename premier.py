@@ -19,25 +19,51 @@ def main():
     if not os.path.exists(carpeta):
         os.makedirs(carpeta)
     
-    # Leer nombres desde nombres.txt
-    try:
-        with open('nombres.txt', 'r') as f:
-            nombres = f.read().strip().split('\n')
-    except FileNotFoundError:
-        print("Error: No se encontró nombres.txt")
-        return
-    
     print("Obteniendo estadísticas de Premier...\n")
     
-    for nombre_completo in nombres:
-        nombre_completo = nombre_completo.strip()
-        if not nombre_completo:
+    # Leer archivos de stats para obtener season_id_premier
+    try:
+        archivos_competitivo = [f for f in os.listdir('stats') if f.endswith('.json')]
+    except FileNotFoundError:
+        print("  ⚠ No se encontró carpeta stats")
+        return
+    
+    for archivo_comp in archivos_competitivo:
+        ruta_comp = os.path.join('stats', archivo_comp)
+        
+        try:
+            with open(ruta_comp, 'r') as f:
+                datos_comp = json.load(f)
+        except Exception as e:
+            print(f"  ✗ Error al leer {archivo_comp}: {e}")
             continue
         
-        # Extraer nombre del jugador (parte antes del #)
-        jugador = nombre_completo.split('#')[0]
+        jugador = datos_comp.get('Jugador')
+        season_id_premier = datos_comp.get('SeasonIdPremier')
+        
+        if not jugador or not season_id_premier:
+            print(f"  ⚠ {jugador} - No tiene seasonId de Premier")
+            continue
         
         print(f"Obteniendo datos de {jugador}...")
+        
+        # Buscar el nombre completo en nombres.txt
+        try:
+            with open('nombres.txt', 'r') as f:
+                nombres_txt = f.read().strip().split('\n')
+            
+            nombre_completo = None
+            for linea in nombres_txt:
+                if linea.strip().startswith(jugador + '#'):
+                    nombre_completo = linea.strip()
+                    break
+            
+            if not nombre_completo:
+                print(f"  ✗ No se encontró ID para {jugador} en nombres.txt")
+                continue
+        except FileNotFoundError:
+            print(f"  ✗ No se encontró nombres.txt")
+            continue
         
         # Hacer petición a /segments/season
         nombre_encoded = quote(nombre_completo)
@@ -45,7 +71,7 @@ def main():
         
         params = {
             'playlist': 'premier',
-            'seasonId': 'ce2783e8-44fc-dd48-3da3-33b5ba6c4a22',
+            'seasonId': season_id_premier,
             'source': 'web',
         }
         
