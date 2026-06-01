@@ -49,8 +49,6 @@ def main():
                 data = response.json()
                 
                 if 'data' in data and 'segments' in data['data']:
-                    segments = data['data']['segments']
-                    
                     acto_actual = None
                     stats_v26 = None
                     season_id_premier = None
