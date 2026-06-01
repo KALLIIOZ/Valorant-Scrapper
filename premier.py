@@ -59,6 +59,9 @@ def main():
                 if 'data' in data and isinstance(data['data'], list) and len(data['data']) > 0:
                     segment = data['data'][0]
                     
+                    # Extraer el nombre del season
+                    acto_premier = segment.get('metadata', {}).get('name', 'Premier')
+                    
                     # Las stats están dentro del objeto del segment
                     if 'stats' in segment:
                         stats_premier = segment['stats']
@@ -69,6 +72,7 @@ def main():
                     # Extraer las mismas stats que en Competitivo
                     datos_principales = {
                         'Jugador': jugador,
+                        'Acto': acto_premier,
                         'Damage/Round': stats_premier.get('damagePerRound', {}).get('displayValue'),
                         'K/D Ratio': stats_premier.get('kDRatio', {}).get('displayValue'),
                         'Headshot %': stats_premier.get('headshotsPercentage', {}).get('displayValue'),

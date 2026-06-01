@@ -6,7 +6,29 @@ from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font, Alignment
 
 
-def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx', carpeta_premier='stats_premier'):
+def agregar_separador_fechas(df):
+    """Inserta una fila en blanco entre grupos de fechas diferentes"""
+    if df.empty or 'Fecha' not in df.columns:
+        return df
+    
+    filas_insertadas = []
+    fecha_anterior = None
+    
+    for idx, row in df.iterrows():
+        fecha_actual = row['Fecha']
+        
+        # Si la fecha cambió y no es la primera iteración, agregar fila en blanco
+        if fecha_anterior is not None and fecha_anterior != fecha_actual:
+            fila_blanca = pd.Series({col: '' for col in df.columns})
+            filas_insertadas.append(fila_blanca)
+        
+        filas_insertadas.append(row)
+        fecha_anterior = fecha_actual
+    
+    return pd.DataFrame(filas_insertadas).reset_index(drop=True)
+
+
+def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='AX_Stats.xlsx', carpeta_premier='stats_premier'):
     """
     Lee todos los archivos JSON de las carpetas de stats y los exporta a un archivo XLSX.
     Los datos se organizan por fecha sin sobrescribir información anterior.
@@ -38,6 +60,10 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx', c
     df_competitivo_nuevo = pd.DataFrame(datos_competitivo)
     df_competitivo_nuevo['Fecha'] = fecha_actual
     
+    # Remover columna SeasonIdPremier de Competitivo
+    if 'SeasonIdPremier' in df_competitivo_nuevo.columns:
+        df_competitivo_nuevo = df_competitivo_nuevo.drop('SeasonIdPremier', axis=1)
+    
     columnas_numericas_comp = [col for col in df_competitivo_nuevo.columns 
                                if col not in ['Jugador', 'Fecha', 'Acto'] and col != 'Comparación']
     
@@ -52,8 +78,12 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx', c
     if os.path.exists(archivo_salida):
         try:
             df_competitivo_existente = pd.read_excel(archivo_salida, sheet_name='Competitivo')
+            # Remover SeasonIdPremier si existe
+            if 'SeasonIdPremier' in df_competitivo_existente.columns:
+                df_competitivo_existente = df_competitivo_existente.drop('SeasonIdPremier', axis=1)
             df_competitivo = agregar_cambios(df_competitivo_nuevo, df_competitivo_existente, columnas_numericas_comp)
             df_competitivo = pd.concat([df_competitivo_existente, df_competitivo], ignore_index=True)
+            df_competitivo = agregar_separador_fechas(df_competitivo)
         except Exception as e:
             print(f"Error al leer Competitivo existente: {e}")
             df_competitivo = df_competitivo_nuevo
@@ -64,27 +94,28 @@ def exportar_stats_a_xlsx(carpeta='stats', archivo_salida='estadisticas.xlsx', c
                 xl_file = pd.ExcelFile(archivo_salida)
                 if 'Premier' in xl_file.sheet_names:
                     df_premier_existente = pd.read_excel(archivo_salida, sheet_name='Premier')
-                    df_premier = agregar_cambios(df_premier_nuevo, df_premier_existente, columnas_numericas_prem)
+                    df_premier = agregar_cambios(df_premier_nuevo, df_premier_existente, columnas_numericas_prem) # type: ignore
                     df_premier = pd.concat([df_premier_existente, df_premier], ignore_index=True)
+                    df_premier = agregar_separador_fechas(df_premier)
                 else:
-                    df_premier = df_premier_nuevo
+                    df_premier = df_premier_nuevo # type: ignore
             except Exception as e:
                 print(f"Error al leer Premier existente: {e}")
-                df_premier = df_premier_nuevo
+                df_premier = df_premier_nuevo # type: ignore
     else:
         df_competitivo = df_competitivo_nuevo
-        df_premier = df_premier_nuevo if datos_premier else None
+        df_premier = df_premier_nuevo if datos_premier else None # type: ignore
     
     # Exportar a XLSX
     try:
         with pd.ExcelWriter(archivo_salida, engine='openpyxl', mode='w') as writer:
             df_competitivo.to_excel(writer, index=False, sheet_name='Competitivo')
-            if df_premier is not None:
-                df_premier.to_excel(writer, index=False, sheet_name='Premier')
+            if df_premier is not None: # type: ignore
+                df_premier.to_excel(writer, index=False, sheet_name='Premier') # type: ignore
         
         aplicar_formato_condicional(archivo_salida, df_competitivo, columnas_numericas_comp, 'Competitivo')
-        if df_premier is not None:
-            aplicar_formato_condicional(archivo_salida, df_premier, columnas_numericas_prem, 'Premier')
+        if df_premier is not None: # type: ignore
+            aplicar_formato_condicional(archivo_salida, df_premier, columnas_numericas_prem, 'Premier') # type: ignore
         
         print(f"Estadísticas exportadas a {archivo_salida}")
         return True
