@@ -1,145 +1,152 @@
 # 📊 Valorant Stats Automation
 
-Una herramienta para automatizar la recopilación y análisis de estadísticas de Valorant de múltiples jugadores.
+An automated tool for collecting and analyzing Valorant statistics from multiple players.
 
-## 📋 Requisitos
+## 📋 Requirements
 
-### Instalación de dependencias
+### Installing dependencies
 
-Antes de ejecutar el script, instala las siguientes librerías de Python:
+Before running the script, install the following Python libraries:
 
 ```bash
 pip install requests beautifulsoup4 pandas openpyxl
 ```
 
-### Archivos requeridos
+### Required files
 
-- `nombres.txt` - Archivo de texto con los IDs de Valorant (formato: `Nombre#ID`)
+- `nombres.txt` - Text file with Valorant IDs (format: `Name#ID`)
 
-**Ejemplo de `nombres.txt`:**
+**Example `nombres.txt`:**
 ```
 Lord Bane#Sith
 Jokker898#LAN
 Lord Bane#P4DME
 ```
 
-## 🚀 Cómo usar
+## 🚀 How to use
 
-### Paso 1: Preparar los nombres
-Edita el archivo `nombres.txt` y agrega los jugadores que deseas monitorear en formato `Nombre#ID`.
+### Step 1: Prepare player names
+Edit the `nombres.txt` file and add the players you want to monitor in the format `Name#ID`.
 
-### Paso 2: Ejecutar el script
+### Step 2: Run the script
 ```bash
 python main.py
 ```
 
-El script:
-1. Lee los nombres del archivo `nombres.txt`
-2. Hace una petición a la API de Valorant Tracker para cada jugador
-3. Extrae las estadísticas de **V26: ACT III Competitive**
-4. Guarda un JSON individual para cada jugador en la carpeta `stats/`
-5. Genera un archivo `estadisticas.xlsx` con todas las estadísticas consolidadas
+The script will:
+1. Read player names from `nombres.txt`
+2. Make requests to the Valorant Tracker API for each player
+3. Extract statistics from the **most recent competitive act**
+4. Save individual JSON files for each player in the `stats/` folder
+5. Generate an `estadisticas.xlsx` file with all consolidated statistics
 
-## 📁 Estructura de carpetas generada
+## 📁 Generated folder structure
 
 ```
 Automation/
 ├── main.py
 ├── estadisticas.py
+├── premier.py
 ├── nombres.txt
+├── requirements.txt
 ├── estadisticas.xlsx
-└── stats/
-    ├── Quesitoo.json
-    ├── Nabi.json
-    ├── Arrocito salado.json
-    └── ... (un JSON por jugador)
+├── stats/
+│   ├── Lord Bane.json
+│   ├── Jokker.json
+│   ├── Lord.json
+│   └── ... (one JSON per player)
+└── stats_premier/
+    ├── Lord Bane.json
+    ├── Jokker.json
+    ├── Lord.json
+    └── ... (one JSON per player - Premier stats)
 ```
 
-## 📄 Contenido de cada JSON
+## 📄 Content of each JSON file
 
-Cada archivo JSON en la carpeta `stats/` contiene las siguientes estadísticas del jugador:
+Each JSON file in the `stats/` folder contains the following player statistics:
 
 ```json
 {
-  "Jugador": "Nombre del jugador",
+  "Jugador": "Player Name",
   "Damage/Round": "145.6",
   "K/D Ratio": "1.09",
   "Headshot %": "35.1%",
   "KAST": "73.0%",
   "ACS": "214.7",
-  "KAD Ratio": "1.49",
+  "KAD Ratio": "1.49"
 }
 ```
 
-### Descripción de estadísticas:
-- **Damage/Round**: Daño promedio por ronda
-- **K/D Ratio**: Proporción de asesinatos / muertes
-- **Headshot %**: Porcentaje de asesinatos con headshot
-- **KAST**: Porcentaje de rondas con Kill, Assist, Survival o Trade
-- **ACS**: Average Combat Score (puntuación promedio de combate)
-- **KAD Ratio**: Proporción de (Kills + Assists) / Deaths
+### Statistics description:
+- **Damage/Round**: Average damage per round
+- **K/D Ratio**: Kills to deaths ratio
+- **Headshot %**: Percentage of kills that are headshots
+- **KAST**: Percentage of rounds with Kill, Assist, Survival, or Trade
+- **ACS**: Average Combat Score (average combat score)
+- **KAD Ratio**: Ratio of (Kills + Assists) / Deaths
 
-## 📊 Contenido del archivo XLSX (`estadisticas.xlsx`)
+## 📊 XLSX file content (`estadisticas.xlsx`)
 
-### Características principales:
+### Main features:
 
-1. **Consolidación de datos**
-   - Todas las estadísticas de todos los jugadores en un solo archivo
-   - Una fila por jugador por ejecución del script
+1. **Data consolidation**
+   - All statistics from all players in a single file
+   - One row per player per script execution
 
-2. **Historial por fecha**
-   - Columna `Fecha` que registra cuándo se ejecutó la recopilación
-   - Los datos se acumulan sin sobrescribirse
-   - Permite ver la evolución en el tiempo
+2. **Date history**
+   - `Fecha` (Date) column recording when data was collected
+   - Data accumulates without being overwritten
+   - Track performance evolution over time
 
-3. **Análisis de rendimiento**
-   - Columnas adicionales `{Stat}_Cambio` para cada estadística
-   - Compara el rendimiento actual con la ejecución anterior
-   - **Color verde**: Mejora de rendimiento
-   - **Color rojo**: Bajón de rendimiento
-   - **Color gris**: Sin cambios
+3. **Performance analysis**
+   - Additional `{Stat}_Cambio` (Change) columns for each statistic
+   - Compares current performance with previous execution
+   - **Green color**: Performance improvement
+   - **Red color**: Performance decline
+   - **Gray color**: No change
 
-4. **Diseño visual**
-   - Encabezados en **azul oscuro**
-   - Nombres de jugadores en **naranja claro**
-   - Fechas en **verde claro**
-   - Otras estadísticas en **azul medio claro**
-   - Encabezados congelados para fácil desplazamiento
+4. **Visual design**
+   - Headers in **dark blue**
+   - Player names in **light orange**
+   - Dates in **light green**
+   - Other statistics in **light blue**
+   - Frozen headers for easy scrolling
 
-### Ejemplo de estructura del XLSX:
+### Example XLSX structure:
 
 | Jugador | Fecha | Damage/Round | K/D Ratio | ... | Damage/Round_Cambio | K/D Ratio_Cambio | ... |
 |---------|-------|--------------|-----------|-----|---------------------|------------------|-----|
-| Lord Bane | 2026-05-28 10:30:00 | 145.6 | 1.09 | ... | | | |
-| Jokker898 | 2026-05-28 10:30:00 | 142.3 | 1.15 | ... | | | |
+| Lord Bane | 2026-06-01 10:30:00 | 145.6 | 1.09 | ... | | | |
+| Jokker898 | 2026-06-01 10:30:00 | 142.3 | 1.15 | ... | | | |
 
-## 🔄 Ejecución periódica
+## 🔄 Periodic execution
 
-Para monitorear el progreso de tus compañeros en el tiempo, ejecuta el script regularmente:
-- **Diariamente** para ver cambios día a día
-- **Semanalmente** para análisis de rendimiento
-- Los datos se acumularán automáticamente en el Excel
+To monitor your teammates' progress over time, run the script regularly:
+- **Daily** for day-to-day changes
+- **Weekly** for performance analysis
+- Data will accumulate automatically in the Excel file
 
-## 📝 Notas
+## 📝 Notes
 
-- La API utilizada es `https://api.tracker.gg/` (Tracker.gg)
-- Extrae estadísticas del acto mas reciente
-- Si un jugador no existe o no tiene datos disponibles, aparecerá un error en la consola
-- Los JSONs se guardan con el nombre del jugador (sin el ID)
+- API used: `https://api.tracker.gg/` (Tracker.gg)
+- Extracts statistics from the most recent competitive act
+- If a player doesn't exist or has no available data, an error will appear in the console
+- JSON files are saved with the player name (without the ID)
 
 ## 🐛 Troubleshooting
 
-### Error "No se encontró el archivo nombres.txt"
-- Asegúrate de que el archivo `nombres.txt` existe en la misma carpeta que `main.py`
+### Error "File nombres.txt not found"
+- Make sure the `nombres.txt` file exists in the same folder as `main.py`
 
-### Error de conexión a la API
-- Verifica tu conexión a internet
-- La API de Tracker.gg podría estar temporalmente no disponible
+### API connection error
+- Verify your internet connection
+- Tracker.gg API might be temporarily unavailable
 
-### El Excel no se genera
-- Asegúrate de que `openpyxl` está instalado: `pip install openpyxl`
-- Verifica que tengas permisos de escritura en la carpeta
+### Excel file is not generated
+- Make sure `openpyxl` is installed: `pip install openpyxl`
+- Verify that you have write permissions in the folder
 
 ---
 
-**¡Listo!** Ya sabes cómo usar la herramienta. 🎮📈
+**You're all set!** Now you know how to use the tool. 🎮📈
