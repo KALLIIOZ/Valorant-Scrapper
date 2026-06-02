@@ -78,7 +78,7 @@ def main():
                             'K/D Ratio': stats_v26.get('kDRatio', {}).get('displayValue'),
                             'Headshot %': stats_v26.get('headshotsPercentage', {}).get('displayValue'),
                             'KAST': stats_v26.get('kAST', {}).get('displayValue'),
-                            'ACS': stats_v26.get('score', {}).get('displayValue'),
+                            'ACS': stats_v26.get('scorePerRound', {}).get('displayValue'),
                             'KAD Ratio': stats_v26.get('kADRatio', {}).get('displayValue'),
                         }
                         
